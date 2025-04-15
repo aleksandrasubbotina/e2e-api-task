@@ -1,57 +1,45 @@
-import { isPostResponseBody } from '../../utils/response-validator';
-import { postBody, postRequest } from '../api/post.request';
+/* eslint-disable ordered-imports/ordered-imports */
+import * as types from '../types/types';
+import { customRequest, customRequestBody, isPostResponseBody } from '../utils/helping-functions';
 
 const BASE_URL: string = process.env.BASE_URL!;
 let validId: number;
 
 describe('getting a post', () => {
   beforeAll(async () => {
-    const response = await fetch(BASE_URL, postRequest);
+    const response = await fetch(BASE_URL, customRequest());
 
-    if (!response.ok) {
-      throw new Error(`Failed to create new post: ${response.status} status`);
-    }
-    const responseBody = await response.json();
-
-    if (isPostResponseBody(responseBody)) {
-      validId = responseBody.id;
-    } else {
-      throw new Error('Invalid response body structure');
-    }
+    const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
+    validId = responseBody.id;
   });
-  
 
   // positive
   describe('given valid post id', () => {
-    it('should not return post object with correct data', async () => {
+    it('should return post object with correct data', async () => {
       const response = await fetch(`${BASE_URL}/${validId}`);
+      expect(response.ok).toBe(true);
 
-      expect(response.status).toBe(200);
-
-      const responseBody = await response.json();
-      if (!isPostResponseBody(responseBody)) {
-        throw new Error('Invalid response body structure');
-      }
-
-      expect(responseBody.id).toBe(validId);
-      expect(responseBody.userId).toBe(postBody.userId);
-      expect(responseBody.title).toBe(postBody.title);
-      expect(responseBody.userId).toBe(postBody.userId);
+      const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
+      const expectedResponseBody: types.ResponseBody = {
+        id: validId,
+        ...customRequestBody(),
+      };
+      expect(responseBody).toEqual(expectedResponseBody);
     });
 
     it('should not affect initial post data', async () => {
       const response = await fetch(`${BASE_URL}/${validId}`);
-      expect(response.status).toBe(200);
+      expect(response.ok).toBe(true);
       
       const responseBody = await response.json();
       if (!isPostResponseBody(responseBody)) {
         throw new Error('Invalid response body structure');
       }
-
-      expect(responseBody.id).toBe(validId);
-      expect(responseBody.userId).toBe(postBody.userId);
-      expect(responseBody.title).toBe(postBody.title);
-      expect(responseBody.userId).toBe(postBody.userId);
+      const expectedResponseBody: types.ResponseBody = {
+        id: validId,
+        ...customRequestBody(),
+      };
+      expect(responseBody).toEqual(expectedResponseBody);
     });
   });
 
@@ -61,60 +49,107 @@ describe('getting a post', () => {
       const response = await fetch(`${BASE_URL}/007`);
       expect(response.status).toBe(404);
 
-      const body = await response.json();
-      expect(body).toEqual({});
+      let responseBody;
+      try {
+        responseBody = await response.json();
+      } catch (error) {
+        responseBody = null;
+      }
+      expect(responseBody).toBeNull();
     });
   });
 
-  describe('given invalid post id', () => {
-    describe('containing 10 digits', () => {
+  describe('given invalid post id:', () => {
+    describe('10 digits', () => {
       it('should not return post object', async () => {
         const response = await fetch(`${BASE_URL}/999999999999999999999999`);
         expect(response.status).toBe(404);
 
-        const body = await response.json();
-        expect(body).toEqual({});
+        let responseBody;
+        try {
+          responseBody = await response.json();
+        } catch (error) {
+          responseBody = null;
+        }
+        expect(responseBody).toBeNull();
       });
     });
 
-    describe('containing zero', () => {
+    describe('zero', () => {
       it('should not return post object', async () => {
         const response = await fetch(`${BASE_URL}/0`);
         expect(response.status).toBe(404);
 
-        const body = await response.json();
-        expect(body).toEqual({});
+        let responseBody;
+        try {
+          responseBody = await response.json();
+        } catch (error) {
+          responseBody = null;
+        }
+        expect(responseBody).toBeNull();
+
+        
       });
     });
 
-    describe('containing negative number', () => {
+    describe('negative number', () => {
       it('should not return post object', async () => {
         const response = await fetch(`${BASE_URL}/-1`);
         expect(response.status).toBe(404);
 
-        const body = await response.json();
-        expect(body).toEqual({});
+        let responseBody;
+        try {
+          responseBody = await response.json();
+        } catch (error) {
+          responseBody = null;
+        }
+        expect(responseBody).toBeNull();
+      });
+    });
+
+    describe('decimal', () => {
+      it('should not return post object', async () => {
+        const response = await fetch(`${BASE_URL}/1.5`);
+        expect(response.status).toBe(404);
+
+        let responseBody;
+        try {
+          responseBody = await response.json();
+        } catch (error) {
+          responseBody = null;
+        }
+        expect(responseBody).toBeNull();
       });
     });
 
 
-    describe('containing letters', () => {
+    describe('letters', () => {
       it('should not return post object', async () => {
         const response = await fetch(`${BASE_URL}/abc`);
         expect(response.status).toBe(404);
 
-        const body = await response.json();
-        expect(body).toEqual({});
+        let responseBody;
+        try {
+          responseBody = await response.json();
+        } catch (error) {
+          responseBody = null;
+        }
+        expect(responseBody).toBeNull();
       });
     });
 
-    describe('containing special characters', () => {
+    describe('special characters', () => {
       it('should not return post object', async () => {
         const response = await fetch(`${BASE_URL}/&##`);
         expect(response.status).toBe(404);
 
-        const body = await response.json();
-        expect(body).toEqual({});
+        let responseBody;
+        try {
+          responseBody = await response.json();
+        } catch (error) {
+          responseBody = null;
+        }
+        expect(responseBody).toBeNull();
       });
     });
   });
