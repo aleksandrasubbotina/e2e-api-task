@@ -1,5 +1,5 @@
 /* eslint-disable ordered-imports/ordered-imports */
-import { customRequestBody, customRequest, invalidRequest } from '../utils/helping-functions';
+import { customRequestBody, customPostRequest, invalidRequest } from '../utils/helping-functions';
 import * as types from 'src/types/types';
 
 const BASE_URL: string = process.env.BASE_URL!;
@@ -10,7 +10,7 @@ describe('creating a post', () => {
   // positive
   describe('given a valid request body', () => {
     it('should return post object with matching field values', async () => {
-      const response = await fetch(BASE_URL, customRequest());
+      const response = await fetch(BASE_URL, customPostRequest());
       expect(response.ok).toBe(true);
       
       const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
@@ -26,7 +26,7 @@ describe('creating a post', () => {
 
     describe('sent twice', () => {
       it('should return post object with unique id', async () => {
-        const response = await fetch(BASE_URL, customRequest());
+        const response = await fetch(BASE_URL, customPostRequest());
         expect(response.ok).toBe(true);
         
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
@@ -36,7 +36,7 @@ describe('creating a post', () => {
     
     describe('sent the second time with the same data', () => {
       it('should return post object with id from the first response incremented by 1', async () => {
-        const response = await fetch(BASE_URL, customRequest());
+        const response = await fetch(BASE_URL, customPostRequest());
         expect(response.ok).toBe(true);
         
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
@@ -92,7 +92,7 @@ describe('creating a post', () => {
           title: 'Test title',
         };
     
-        const response = await fetch(BASE_URL, customRequest(requestBody));
+        const response = await fetch(BASE_URL, customPostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
@@ -105,10 +105,61 @@ describe('creating a post', () => {
       });
     });
 
-    // negative
+    // TESTING HEADERS
+    describe('with uppercase headers', () => {
+      it('should return post object with matching fields', async () => {
+        const request = {
+          method: 'POST',
+          headers: { 'CONTENT-TYPE': 'APPLICATION/JSON; CHARSET=UTF-8' },
+          body: JSON.stringify({
+            title: 'foo',
+            body: 'bar',
+            userId: 1,
+          }),
+        };
+  
+        const response = await fetch(BASE_URL, request);
+        expect(response.ok).toBe(true);
+
+        const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
+        postId = responseBody.id;
+        const expectedResponseBody = {
+          id: postId,
+          ...customRequestBody(),
+        };
+        expect(responseBody).toEqual(expectedResponseBody);
+      });
+    });
+
+    describe('without "Content-type" header', () => {
+      it('should not return post object', async () => {
+        const request = {
+          method: 'POST',
+          headers: {},
+          body: JSON.stringify({
+            title: 'foo',
+            body: 'bar',
+            userId: 1,
+          }),
+        };
+    
+        const response = await fetch(BASE_URL, request);
+        expect(response.ok).toBe(true);
+
+        const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
+        postId = responseBody.id;
+        const expectedResponseBody = {
+          id: postId,
+          ...customRequestBody(),
+        };
+        expect(responseBody).toEqual(expectedResponseBody);
+      });
+    });
+
+    // negative for whole request
     describe('and id in URL', () => {
       it('should not return post object', async () => {
-        const response = await fetch(`${BASE_URL}/1`, customRequest());
+        const response = await fetch(`${BASE_URL}/1`, customPostRequest());
         expect(response.status).toBe(404);
 
         let responseBody;
@@ -275,7 +326,7 @@ describe('creating a post', () => {
         const currentValue = 'ba ba ba';
         const requestBody = customRequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customRequest(requestBody));
+        const response = await fetch(BASE_URL, customPostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
@@ -293,7 +344,7 @@ describe('creating a post', () => {
         const currentValue = '   ba ba ba     ';
         const requestBody = customRequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customRequest(requestBody));
+        const response = await fetch(BASE_URL, customPostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
@@ -311,7 +362,7 @@ describe('creating a post', () => {
         const currentValue = 'Ba Ba Ba';
         const requestBody = customRequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customRequest(requestBody));
+        const response = await fetch(BASE_URL, customPostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
@@ -329,7 +380,7 @@ describe('creating a post', () => {
         const currentValue = '';
         const requestBody = customRequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customRequest(requestBody));
+        const response = await fetch(BASE_URL, customPostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
@@ -347,7 +398,7 @@ describe('creating a post', () => {
         const currentValue = 'a';
         const requestBody = customRequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customRequest(requestBody));
+        const response = await fetch(BASE_URL, customPostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
@@ -365,7 +416,7 @@ describe('creating a post', () => {
         const currentValue = 'a'.repeat(9999);
         const requestBody = customRequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customRequest(requestBody));
+        const response = await fetch(BASE_URL, customPostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
@@ -383,7 +434,7 @@ describe('creating a post', () => {
         const currentValue = '.,;:!?\'"-()[]{}';
         const requestBody = customRequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customRequest(requestBody));
+        const response = await fetch(BASE_URL, customPostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
@@ -401,7 +452,7 @@ describe('creating a post', () => {
         const currentValue = '@ # $ % ^ & * ~ | \ / < >';
         const requestBody = customRequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customRequest(requestBody));
+        const response = await fetch(BASE_URL, customPostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
@@ -419,7 +470,7 @@ describe('creating a post', () => {
         const currentValue = 'مرحبًا بالعالم';
         const requestBody = customRequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customRequest(requestBody));
+        const response = await fetch(BASE_URL, customPostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
@@ -488,5 +539,43 @@ describe('creating a post', () => {
         });
       });
     });
+  });
+});
+
+describe('sending GET request with body instead of POST', () => {
+  it('should not return post object', async () => {
+    const request = {
+      method: 'GET',
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8',
+      },
+      body: JSON.stringify({
+        title: 'foo',
+        body: 'bar',
+        userId: 1,
+      }),
+    };
+
+    const response = await fetch(BASE_URL, request);
+    expect(response.ok).toBe(false);
+  });
+});
+
+describe('sending DELETE request with body instead of POST', () => {
+  it('should not delete and return post object', async () => {
+    const request = {
+      method: 'DELETE',
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8',
+      },
+      body: JSON.stringify({
+        title: 'foo',
+        body: 'bar',
+        userId: 1,
+      }),
+    };
+
+    const response = await fetch(BASE_URL, request);
+    expect(response.ok).toBe(false);
   });
 });

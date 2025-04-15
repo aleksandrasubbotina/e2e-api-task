@@ -16,13 +16,33 @@ export function customRequestBody(testingData?: string | number): postTypes.Requ
   };
 }
 
-export function customRequest(body = customRequestBody()): postTypes.Request {
+export function randomValidRequestBody(excludeFields: (keyof postTypes.RequestBody)[] = []): Partial<postTypes.RequestBody> | postTypes.RequestBody {
+  const body: postTypes.RequestBody = {
+    title: `title-${Date.now()}`,
+    body: `body-${Date.now()}`,
+    userId: `userId-${Date.now()}`,
+  };
+
+  for (const field of excludeFields) {
+    delete body[field];
+  }
+
+  return body;
+}
+
+export function customPostRequest(body = customRequestBody(), headers = validHeaders): postTypes.Request {
   return {
     method: 'POST',
     body: JSON.stringify(body),
-    headers: {
-      'Content-type': 'application/json; charset=UTF-8',
-    },
+    headers: headers,
+  };
+}
+
+export function customPutRequest(body = customRequestBody(), headers = validHeaders): postTypes.Request {
+  return {
+    method: 'PUT',
+    body: JSON.stringify(body),
+    headers: headers,
   };
 }
 

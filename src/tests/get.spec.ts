@@ -1,13 +1,13 @@
 /* eslint-disable ordered-imports/ordered-imports */
 import * as types from '../types/types';
-import { customRequest, customRequestBody, isPostResponseBody } from '../utils/helping-functions';
+import { customPostRequest, customRequestBody, isPostResponseBody } from '../utils/helping-functions';
 
 const BASE_URL: string = process.env.BASE_URL!;
 let validId: number;
 
 describe('getting a post', () => {
   beforeAll(async () => {
-    const response = await fetch(BASE_URL, customRequest());
+    const response = await fetch(BASE_URL, customPostRequest());
 
     const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
     validId = responseBody.id;

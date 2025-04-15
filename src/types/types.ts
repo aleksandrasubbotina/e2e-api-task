@@ -11,5 +11,7 @@ export interface ResponseBody extends RequestBody {
 export interface Request {
   method: string;
   body: string;
-  headers: Record<string, string>;
+  headers: Headers;
 }
+
+export type Headers = Record<string, string>;
