@@ -1,5 +1,5 @@
 /* eslint-disable ordered-imports/ordered-imports */
-import { customRequestBody, customPostRequest, invalidRequest } from '../utils/helping-functions';
+import { RequestBody, PostRequest, invalidPostRequest } from '../utils/helping-functions';
 import * as types from 'src/types/types';
 
 const BASE_URL: string = process.env.BASE_URL!;
@@ -10,7 +10,7 @@ describe('creating a post', () => {
   // positive
   describe('given a valid request body', () => {
     it('should return post object with matching field values', async () => {
-      const response = await fetch(BASE_URL, customPostRequest());
+      const response = await fetch(BASE_URL, PostRequest());
       expect(response.ok).toBe(true);
       
       const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
@@ -19,14 +19,14 @@ describe('creating a post', () => {
       postId = responseBody.id;
       const expectedResponseBody = {
         id: postId,
-        ...customRequestBody(),
+        ...RequestBody(),
       };
       expect(responseBody).toEqual(expectedResponseBody);
     });
 
     describe('sent twice', () => {
       it('should return post object with unique id', async () => {
-        const response = await fetch(BASE_URL, customPostRequest());
+        const response = await fetch(BASE_URL, PostRequest());
         expect(response.ok).toBe(true);
         
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
@@ -36,7 +36,7 @@ describe('creating a post', () => {
     
     describe('sent the second time with the same data', () => {
       it('should return post object with id from the first response incremented by 1', async () => {
-        const response = await fetch(BASE_URL, customPostRequest());
+        const response = await fetch(BASE_URL, PostRequest());
         expect(response.ok).toBe(true);
         
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
@@ -47,7 +47,7 @@ describe('creating a post', () => {
     describe('with duplicated fields', () => {
       it('should return post object with the last field value', async () => {
         const invalidBody = '{"title":"first","title":"last","body":"bar","userId":1,}';
-        const request = invalidRequest(invalidBody);
+        const request = invalidPostRequest(invalidBody);
     
         const response = await fetch(BASE_URL, request);
         expect(response.ok).toBe(true);
@@ -67,7 +67,7 @@ describe('creating a post', () => {
     describe('with extra fields', () => {
       it('should return post object without the extra field', async () => {
         const invalidBody = '{"title":"foo","body":"bar","userId":1,"rating":100500}';
-        const request = invalidRequest(invalidBody);
+        const request = invalidPostRequest(invalidBody);
     
         const response = await fetch(BASE_URL, request);
         expect(response.ok).toBe(true);
@@ -92,14 +92,14 @@ describe('creating a post', () => {
           title: 'Test title',
         };
     
-        const response = await fetch(BASE_URL, customPostRequest(requestBody));
+        const response = await fetch(BASE_URL, PostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
         postId = responseBody.id;
         const expectedResponseBody = {
           id: postId,
-          ...customRequestBody(),
+          ...RequestBody(),
         };
         expect(responseBody).toEqual(expectedResponseBody);
       });
@@ -125,7 +125,7 @@ describe('creating a post', () => {
         postId = responseBody.id;
         const expectedResponseBody = {
           id: postId,
-          ...customRequestBody(),
+          ...RequestBody(),
         };
         expect(responseBody).toEqual(expectedResponseBody);
       });
@@ -150,7 +150,7 @@ describe('creating a post', () => {
         postId = responseBody.id;
         const expectedResponseBody = {
           id: postId,
-          ...customRequestBody(),
+          ...RequestBody(),
         };
         expect(responseBody).toEqual(expectedResponseBody);
       });
@@ -159,7 +159,7 @@ describe('creating a post', () => {
     // negative for whole request
     describe('and id in URL', () => {
       it('should not return post object', async () => {
-        const response = await fetch(`${BASE_URL}/1`, customPostRequest());
+        const response = await fetch(`${BASE_URL}/1`, PostRequest());
         expect(response.status).toBe(404);
 
         let responseBody;
@@ -177,7 +177,7 @@ describe('creating a post', () => {
     describe('in XML format', () => {
       it('should not return post object', async () => {
         const invalidBody = '<body><title>foo</title><body>bar</body><userId>1</userId></body>';
-        const request = invalidRequest(invalidBody);
+        const request = invalidPostRequest(invalidBody);
     
         const response = await fetch(BASE_URL, request);
         expect(response.ok).toBe(false);
@@ -195,7 +195,7 @@ describe('creating a post', () => {
     describe('with trailing comma', () => {
       it('should not return post object', async () => {
         const invalidBody = '{"title":"foo","body":"bar","userId":1,}';
-        const request = invalidRequest(invalidBody);
+        const request = invalidPostRequest(invalidBody);
     
         const response = await fetch(BASE_URL, request);
         expect(response.ok).toBe(false);
@@ -213,7 +213,7 @@ describe('creating a post', () => {
     describe('with missing comma between fields', () => {
       it('should not return post object', async () => {
         const invalidBody = '{"title":"foo""body":"bar","userId":1}';
-        const request = invalidRequest(invalidBody);
+        const request = invalidPostRequest(invalidBody);
     
         const response = await fetch(BASE_URL, request);
         expect(response.ok).toBe(false);
@@ -231,7 +231,7 @@ describe('creating a post', () => {
     describe('with single quotes', () => {
       it('should not return post object', async () => {
         const invalidBody = `{'title':'foo','body':'bar','userId':1}`;
-        const request = invalidRequest(invalidBody);
+        const request = invalidPostRequest(invalidBody);
     
         const response = await fetch(BASE_URL, request);
         expect(response.ok).toBe(false);
@@ -249,7 +249,7 @@ describe('creating a post', () => {
     describe('with missing quotes on keys', () => {
       it('should not return post object', async () => {
         const invalidBody = '{title:"foo",body:"bar",userId:1}';
-        const request = invalidRequest(invalidBody);
+        const request = invalidPostRequest(invalidBody);
     
         const response = await fetch(BASE_URL, request);
         expect(response.ok).toBe(false);
@@ -267,7 +267,7 @@ describe('creating a post', () => {
     describe('with malformed json', () => {
       it('should not return post object', async () => {
         const invalidBody = `{title:foo,useriD,body:bar}`;
-        const request = invalidRequest(invalidBody);
+        const request = invalidPostRequest(invalidBody);
     
         const response = await fetch(BASE_URL, request);
         expect(response.ok).toBe(false);
@@ -285,7 +285,7 @@ describe('creating a post', () => {
     describe('with key without a value', () => {
       it('should not return post object', async () => {
         const invalidBody = '{"title","body":"bar","userId":1}';
-        const request = invalidRequest(invalidBody);
+        const request = invalidPostRequest(invalidBody);
     
         const response = await fetch(BASE_URL, request);
         expect(response.ok).toBe(false);
@@ -303,7 +303,7 @@ describe('creating a post', () => {
     describe('with empty body', () => {
       it('should not return post object', async () => {
         const invalidBody = '';
-        const request = invalidRequest(invalidBody);
+        const request = invalidPostRequest(invalidBody);
     
         const response = await fetch(BASE_URL, request);
         expect(response.ok).toBe(false);
@@ -324,16 +324,16 @@ describe('creating a post', () => {
     describe('with spaces inside a string', () => {
       it('should return post object with matching values', async () => {
         const currentValue = 'ba ba ba';
-        const requestBody = customRequestBody(currentValue);
+        const requestBody = RequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customPostRequest(requestBody));
+        const response = await fetch(BASE_URL, PostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
         postId = responseBody.id;
         const expectedResponseBody = {
           id: postId,
-          ...customRequestBody(),
+          ...RequestBody(),
         };
         expect(responseBody).toEqual(expectedResponseBody);
       });
@@ -342,16 +342,16 @@ describe('creating a post', () => {
     describe('with leading and trailing spaces', () => {
       it('should return post object with matching values', async () => {
         const currentValue = '   ba ba ba     ';
-        const requestBody = customRequestBody(currentValue);
+        const requestBody = RequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customPostRequest(requestBody));
+        const response = await fetch(BASE_URL, PostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
         postId = responseBody.id;
         const expectedResponseBody = {
           id: postId,
-          ...customRequestBody(),
+          ...RequestBody(),
         };
         expect(responseBody).toEqual(expectedResponseBody);
       });
@@ -360,16 +360,16 @@ describe('creating a post', () => {
     describe('with letters of different case', () => {
       it('should return post object with matching values', async () => {
         const currentValue = 'Ba Ba Ba';
-        const requestBody = customRequestBody(currentValue);
+        const requestBody = RequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customPostRequest(requestBody));
+        const response = await fetch(BASE_URL, PostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
         postId = responseBody.id;
         const expectedResponseBody = {
           id: postId,
-          ...customRequestBody(),
+          ...RequestBody(),
         };
         expect(responseBody).toEqual(expectedResponseBody);
       });
@@ -378,16 +378,16 @@ describe('creating a post', () => {
     describe('of minimum length: 0 characters', () => {
       it('should return post object with matching values', async () => {
         const currentValue = '';
-        const requestBody = customRequestBody(currentValue);
+        const requestBody = RequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customPostRequest(requestBody));
+        const response = await fetch(BASE_URL, PostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
         postId = responseBody.id;
         const expectedResponseBody = {
           id: postId,
-          ...customRequestBody(),
+          ...RequestBody(),
         };
         expect(responseBody).toEqual(expectedResponseBody);
       });
@@ -396,16 +396,16 @@ describe('creating a post', () => {
     describe('of 1 character', () => {
       it('should return post object with matching values', async () => {
         const currentValue = 'a';
-        const requestBody = customRequestBody(currentValue);
+        const requestBody = RequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customPostRequest(requestBody));
+        const response = await fetch(BASE_URL, PostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
         postId = responseBody.id;
         const expectedResponseBody = {
           id: postId,
-          ...customRequestBody(),
+          ...RequestBody(),
         };
         expect(responseBody).toEqual(expectedResponseBody);
       });
@@ -414,16 +414,16 @@ describe('creating a post', () => {
     describe('of 9999 characters', () => {
       it('should return post object with matching values', async () => {
         const currentValue = 'a'.repeat(9999);
-        const requestBody = customRequestBody(currentValue);
+        const requestBody = RequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customPostRequest(requestBody));
+        const response = await fetch(BASE_URL, PostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
         postId = responseBody.id;
         const expectedResponseBody = {
           id: postId,
-          ...customRequestBody(),
+          ...RequestBody(),
         };
         expect(responseBody).toEqual(expectedResponseBody);
       });
@@ -432,16 +432,16 @@ describe('creating a post', () => {
     describe('with punctuation characters', () => {
       it('should return post object with matching values', async () => {
         const currentValue = '.,;:!?\'"-()[]{}';
-        const requestBody = customRequestBody(currentValue);
+        const requestBody = RequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customPostRequest(requestBody));
+        const response = await fetch(BASE_URL, PostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
         postId = responseBody.id;
         const expectedResponseBody = {
           id: postId,
-          ...customRequestBody(),
+          ...RequestBody(),
         };
         expect(responseBody).toEqual(expectedResponseBody);
       });
@@ -450,16 +450,16 @@ describe('creating a post', () => {
     describe('with special characters', () => {
       it('should return post object with matching values', async () => {
         const currentValue = '@ # $ % ^ & * ~ | \ / < >';
-        const requestBody = customRequestBody(currentValue);
+        const requestBody = RequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customPostRequest(requestBody));
+        const response = await fetch(BASE_URL, PostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
         postId = responseBody.id;
         const expectedResponseBody = {
           id: postId,
-          ...customRequestBody(),
+          ...RequestBody(),
         };
         expect(responseBody).toEqual(expectedResponseBody);
       });
@@ -468,16 +468,16 @@ describe('creating a post', () => {
     describe('with arabic lettes', () => {
       it('should return post object with matching values', async () => {
         const currentValue = 'مرحبًا بالعالم';
-        const requestBody = customRequestBody(currentValue);
+        const requestBody = RequestBody(currentValue);
   
-        const response = await fetch(BASE_URL, customPostRequest(requestBody));
+        const response = await fetch(BASE_URL, PostRequest(requestBody));
         expect(response.ok).toBe(true);
 
         const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
         postId = responseBody.id;
         const expectedResponseBody = {
           id: postId,
-          ...customRequestBody(),
+          ...RequestBody(),
         };
         expect(responseBody).toEqual(expectedResponseBody);
       });
@@ -487,7 +487,7 @@ describe('creating a post', () => {
   describe('without title field', () => {
     it('should not return post object', async () => {
       const invalidBody = '{"body":"bar","userId":1,}';
-      const request = invalidRequest(invalidBody);
+      const request = invalidPostRequest(invalidBody);
   
       const response = await fetch(BASE_URL, request);
       expect(response.ok).toBe(false);
@@ -505,7 +505,7 @@ describe('creating a post', () => {
     describe('without body field', () => {
       it('should not return post object', async () => {
         const invalidBody = '{"title":"bar","userId":1,}';
-        const request = invalidRequest(invalidBody);
+        const request = invalidPostRequest(invalidBody);
     
         const response = await fetch(BASE_URL, request);
         expect(response.ok).toBe(false);
@@ -523,7 +523,7 @@ describe('creating a post', () => {
       describe('without userId field', () => {
         it('should not return post object', async () => {
           const invalidBody = '{"title":"bar","body":1,}';
-          const request = invalidRequest(invalidBody);
+          const request = invalidPostRequest(invalidBody);
       
           const response = await fetch(BASE_URL, request);
           expect(response.ok).toBe(false);
@@ -540,42 +540,42 @@ describe('creating a post', () => {
       });
     });
   });
-});
 
-describe('sending GET request with body instead of POST', () => {
-  it('should not return post object', async () => {
-    const request = {
-      method: 'GET',
-      headers: {
-        'Content-type': 'application/json; charset=UTF-8',
-      },
-      body: JSON.stringify({
-        title: 'foo',
-        body: 'bar',
-        userId: 1,
-      }),
-    };
-
-    const response = await fetch(BASE_URL, request);
-    expect(response.ok).toBe(false);
+  describe('sending GET request with body instead of POST', () => {
+    it('should not return post object', async () => {
+      const request = {
+        method: 'GET',
+        headers: {
+          'Content-type': 'application/json; charset=UTF-8',
+        },
+        body: JSON.stringify({
+          title: 'foo',
+          body: 'bar',
+          userId: 1,
+        }),
+      };
+  
+      const response = await fetch(BASE_URL, request);
+      expect(response.ok).toBe(false);
+    });
   });
-});
-
-describe('sending DELETE request with body instead of POST', () => {
-  it('should not delete and return post object', async () => {
-    const request = {
-      method: 'DELETE',
-      headers: {
-        'Content-type': 'application/json; charset=UTF-8',
-      },
-      body: JSON.stringify({
-        title: 'foo',
-        body: 'bar',
-        userId: 1,
-      }),
-    };
-
-    const response = await fetch(BASE_URL, request);
-    expect(response.ok).toBe(false);
+  
+  describe('sending DELETE request with body instead of POST', () => {
+    it('should not delete and return post object', async () => {
+      const request = {
+        method: 'DELETE',
+        headers: {
+          'Content-type': 'application/json; charset=UTF-8',
+        },
+        body: JSON.stringify({
+          title: 'foo',
+          body: 'bar',
+          userId: 1,
+        }),
+      };
+  
+      const response = await fetch(BASE_URL, request);
+      expect(response.ok).toBe(false);
+    });
   });
 });

@@ -8,7 +8,7 @@ const validTitle = 'foo';
 const validBody = 'bar';
 const validUserId = 1;
 
-export function customRequestBody(testingData?: string | number): postTypes.RequestBody {
+export function RequestBody(testingData?: string | number): postTypes.RequestBody {
   return {
     title: testingData ?? validTitle,
     body: testingData ?? validBody,
@@ -16,21 +16,7 @@ export function customRequestBody(testingData?: string | number): postTypes.Requ
   };
 }
 
-export function randomValidRequestBody(excludeFields: (keyof postTypes.RequestBody)[] = []): Partial<postTypes.RequestBody> | postTypes.RequestBody {
-  const body: postTypes.RequestBody = {
-    title: `title-${Date.now()}`,
-    body: `body-${Date.now()}`,
-    userId: `userId-${Date.now()}`,
-  };
-
-  for (const field of excludeFields) {
-    delete body[field];
-  }
-
-  return body;
-}
-
-export function customPostRequest(body = customRequestBody(), headers = validHeaders): postTypes.Request {
+export function PostRequest(body = RequestBody(), headers = validHeaders): postTypes.Request {
   return {
     method: 'POST',
     body: JSON.stringify(body),
@@ -38,7 +24,7 @@ export function customPostRequest(body = customRequestBody(), headers = validHea
   };
 }
 
-export function customPutRequest(body = customRequestBody(), headers = validHeaders): postTypes.Request {
+export function PutRequest(body: Partial<postTypes.RequestBody> = RequestBody(), headers = validHeaders): postTypes.Request {
   return {
     method: 'PUT',
     body: JSON.stringify(body),
@@ -46,9 +32,17 @@ export function customPutRequest(body = customRequestBody(), headers = validHead
   };
 }
 
-export function invalidRequest(body: string, headers = validHeaders): postTypes.Request {
+export function invalidPostRequest(body: string, headers = validHeaders): postTypes.Request {
   return {
     method: 'POST',
+    body: body,
+    headers: headers,
+  };
+}
+
+export function invalidPutRequest(body: string, headers = validHeaders): postTypes.Request {
+  return {
+    method: 'PUT',
     body: body,
     headers: headers,
   };

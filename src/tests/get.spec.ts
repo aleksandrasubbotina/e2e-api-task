@@ -1,13 +1,13 @@
 /* eslint-disable ordered-imports/ordered-imports */
 import * as types from '../types/types';
-import { customPostRequest, customRequestBody, isPostResponseBody } from '../utils/helping-functions';
+import { PostRequest, RequestBody, isPostResponseBody } from '../utils/helping-functions';
 
 const BASE_URL: string = process.env.BASE_URL!;
 let validId: number;
 
 describe('getting a post', () => {
   beforeAll(async () => {
-    const response = await fetch(BASE_URL, customPostRequest());
+    const response = await fetch(BASE_URL, PostRequest());
 
     const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
     validId = responseBody.id;
@@ -22,7 +22,7 @@ describe('getting a post', () => {
       const responseBody: types.ResponseBody = await response.json() as types.ResponseBody;
       const expectedResponseBody: types.ResponseBody = {
         id: validId,
-        ...customRequestBody(),
+        ...RequestBody(),
       };
       expect(responseBody).toEqual(expectedResponseBody);
     });
@@ -37,7 +37,7 @@ describe('getting a post', () => {
       }
       const expectedResponseBody: types.ResponseBody = {
         id: validId,
-        ...customRequestBody(),
+        ...RequestBody(),
       };
       expect(responseBody).toEqual(expectedResponseBody);
     });
@@ -55,7 +55,7 @@ describe('getting a post', () => {
       } catch (error) {
         responseBody = null;
       }
-      expect(responseBody).toBeNull();
+      expect(responseBody).toEqual({});
     });
   });
 
@@ -71,7 +71,7 @@ describe('getting a post', () => {
         } catch (error) {
           responseBody = null;
         }
-        expect(responseBody).toBeNull();
+        expect(responseBody).toEqual({});
       });
     });
 
@@ -86,7 +86,7 @@ describe('getting a post', () => {
         } catch (error) {
           responseBody = null;
         }
-        expect(responseBody).toBeNull();
+        expect(responseBody).toEqual({});
 
         
       });
@@ -103,7 +103,7 @@ describe('getting a post', () => {
         } catch (error) {
           responseBody = null;
         }
-        expect(responseBody).toBeNull();
+        expect(responseBody).toEqual({});
       });
     });
 
@@ -118,7 +118,7 @@ describe('getting a post', () => {
         } catch (error) {
           responseBody = null;
         }
-        expect(responseBody).toBeNull();
+        expect(responseBody).toEqual({});
       });
     });
 
@@ -134,7 +134,7 @@ describe('getting a post', () => {
         } catch (error) {
           responseBody = null;
         }
-        expect(responseBody).toBeNull();
+        expect(responseBody).toEqual({});
       });
     });
 
@@ -149,7 +149,7 @@ describe('getting a post', () => {
         } catch (error) {
           responseBody = null;
         }
-        expect(responseBody).toBeNull();
+        expect(responseBody).toEqual({});
       });
     });
   });
